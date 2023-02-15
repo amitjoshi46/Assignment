@@ -15,21 +15,60 @@ public class Main {
         if (args.length < 5) throw new RuntimeException("Not Enough full trade parameters..!!!");
         // Populate Sample data as provided in example.
         Map <String, Map> tradeIdMap = populateTradeIdMap (args);
-
-        Trade trade = new Trade("T2", "2", "CP-1", "BK1",
-                "20/11/2019", "20/11/2015", false);
         TradeStore tradeStore = new TradeStore(tradeIdMap);
-        //TODO: Get this separated for different cases as parameter
+        Trade trade = getMockedTradeObject (5);
         tradeStore.transmitTrade(trade);
         // Printing full trade objects post transmission...!!!
         for (Map.Entry <String, Map> tradeIdentry : tradeStore.getTradeIdMap().entrySet()) {
             Map <String, Trade> entryVersionMap = tradeIdentry.getValue();
             for (Map.Entry <String, Trade> versionIdEntry : entryVersionMap.entrySet()) {
-                System.out.println("Trade Version Values are " +versionIdEntry.getValue().getTradeId()+ " "
-                        +versionIdEntry.getValue().getVersion()+ " "
-                +versionIdEntry.getValue().isExpired());
+                System.out.println("Post Transmit Trade Version Values are " +versionIdEntry.getValue().getTradeId()+ " "
+                        +versionIdEntry.getValue().getVersion()+ " " +versionIdEntry.getValue().getCpId()+ " "
+                        +versionIdEntry.getValue().getBookId()+ " " +versionIdEntry.getValue().getMaturityDate()+ " "
+                        +versionIdEntry.getValue().getCreatedDate()+ " " +versionIdEntry.getValue().isExpired());
             }
         }
+    }
+
+    /**
+     * Method to prepare Trade Mock Object which will send for transmission. This method get's different case as input
+     * to demonstrate different use cases.
+     * @param caseNumber : Use Case number
+     * @return : Trade Object which is mocked for transmission.
+     */
+    public static Trade getMockedTradeObject (int caseNumber) {
+        Trade trade;
+
+        switch (caseNumber) {
+            case 1 :
+                // Trade has lower version than existing stored trade. This should result exception.
+                trade = new Trade("T3", "2", "CP-3", "B2",
+                        "20/05/2014", "15/02/2023", true);
+                break;
+            case 2 :
+                // Given Trade Version is same, this should result override existing entry in stored Trade Store.
+                // updated maturity date in this example.
+                trade = new Trade("T1", "1", "CP-1", "B1", "22/05/2030", "15/02/2023", false);
+                break;
+            case 3:
+                // if Maturity date is lesser than today's date.
+                // This should be unsuccessful trade, also updates the expiry flag accordingly.
+                trade = new Trade("T1", "1", "CP-1", "B1", "22/05/2019", "15/02/2023", false);
+                break;
+            case 4:
+                // If higher version of existing trade ID has been provided.
+                // Transaction should be successful along with new trade entry against existing trade id.
+                trade = new Trade("T2", "3", "CP-1", "B1", "22/05/2024", "15/02/2023", false);
+                break;
+            case 5:
+                // If new trade id itself got introduced during trade.
+                // Transaction should be successful along with new Trade id as outcome.
+                trade = new Trade("T4", "2", "CP-1", "B1", "22/05/2024", "15/02/2023", false);
+                break;
+            default:
+                throw new IllegalArgumentException("Argument doesn't match with any case");
+        }
+        return trade;
     }
 
     /**

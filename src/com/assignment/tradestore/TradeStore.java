@@ -42,9 +42,9 @@ public class TradeStore {
      */
     public void transmitTrade (Trade trade) throws RuntimeException {
         if (performVersionValidation(trade)) {
-            System.out.println("Successful Trade...!!!");
+            System.out.println("Transmission Successful...!!!");
         } else {
-            System.out.println("Unsuccessful Trade...!!!");
+            System.out.println("Unsuccessful Transmission...!!!");
         }
     }
 
@@ -85,8 +85,10 @@ public class TradeStore {
         Map <String, Trade> newTradeMap;
         if (isTradeIdExists(trade)) {
             newTradeMap = this.tradeIdMap.get(trade.getTradeId());
+            System.out.println("Trade Successful, new Version of trade against existing Trade Id has been added...!!!");
         } else {
             newTradeMap = new HashMap<>();
+            System.out.println("Trade Successful, new TradeId has been introduced along with new Trade Version...!!!");
         }
         newTradeMap.put(trade.getVersion(), trade);
         this.tradeIdMap.put(trade.getTradeId(), newTradeMap);
@@ -100,10 +102,12 @@ public class TradeStore {
         Map <String, Trade> tradeVersionMap = this.tradeIdMap.get(trade.getTradeId());
         if (performMaturityValidation (trade)) {
             tradeVersionMap.put(trade.getVersion(), trade);
+            System.out.println("Trade is Successful, Override existing trade with new trade values");
         } else {
             Trade amendedTrade = tradeVersionMap.get(trade.getVersion());
             amendedTrade.setExpired(true);
             tradeVersionMap.put(trade.getVersion(), amendedTrade);
+            System.out.println("Trade is unsuccessful only updated expiry flag");
         }
         this.tradeIdMap.put(trade.getTradeId(), tradeVersionMap);
     }
@@ -114,7 +118,7 @@ public class TradeStore {
      * @return : True if today's date is equal or lower than maturity date.
      */
     public boolean performMaturityValidation (Trade trade) {
-        SimpleDateFormat sdf = new SimpleDateFormat("DD/MM/YYYY");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         Date today = null;
         String todayFormat = null;
         Date tradeMaturityDate = null;
@@ -122,13 +126,13 @@ public class TradeStore {
             todayFormat = sdf.format(new Date());
             today = sdf.parse(todayFormat);
             tradeMaturityDate = sdf.parse(trade.getMaturityDate());
-            if (today.compareTo(tradeMaturityDate) <= 0) {
-                return true;
+            if (today.compareTo(tradeMaturityDate) > 0) {
+                return false;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return true;
     }
 
     /**
