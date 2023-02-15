@@ -16,7 +16,7 @@ public class Main {
         // Populate Sample data as provided in example.
         Map <String, Map> tradeIdMap = populateTradeIdMap (args);
         TradeStore tradeStore = new TradeStore(tradeIdMap);
-        Trade trade = getMockedTradeObject (5);
+        Trade trade = getMockedTradeObject (2);
         tradeStore.transmitTrade(trade);
         // Printing full trade objects post transmission...!!!
         for (Map.Entry <String, Map> tradeIdentry : tradeStore.getTradeIdMap().entrySet()) {
